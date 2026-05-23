@@ -1,0 +1,657 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Divide y Enfócate — UNAD</title>
+<!-- favicon -->
+  <link rel="icon" type="image/png" href="./assets/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="./assets/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="FocusU" />
+  <link rel="manifest" href="./assets/favicon/site.webmanifest" />
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>📚 Divide y Enfócate</h1>
+  <span class="offline-badge" id="conn-badge">● En línea</span>
+</div>
+
+<!-- SCREENS -->
+
+<!-- HOME -->
+<div class="screen show" id="s-home">
+  <div style="margin: 10px 0 6px; display:flex; justify-content:space-between; align-items:center">
+    <div>
+      <div style="font-size:12px;color:#888">Buenos días,</div>
+      <div style="font-size:18px;font-weight:bold" id="home-name">Grace</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:11px;color:#888" id="home-time"></div>
+    </div>
+  </div>
+
+  <div class="card" style="background:#1a1a1a;color:#fff;cursor:pointer" onclick="go('s-pomo')">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em">Divide y Enfócate</div>
+        <div style="font-size:28px;font-weight:bold;font-variant-numeric:tabular-nums" id="home-pomo-disp">25:00</div>
+        <div style="font-size:11px;color:#666;margin-top:2px">Toca para enfocar</div>
+      </div>
+      <div style="font-size:28px">⏱</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px">
+      <span>Tu progreso global</span>
+      <span id="home-pct" style="font-weight:bold;color:#222">0%</span>
+    </div>
+    <div class="pbar-bg"><div class="pbar-fill" id="home-pbar" style="width:0%"></div></div>
+    <div style="font-size:11px;color:#999;margin-top:4px;text-align:right" id="home-count">0 / 0 tareas completadas</div>
+  </div>
+
+  <div class="section-lbl">Abiertas</div>
+  <div id="home-tasks-list"></div>
+  <div class="empty-msg" id="home-empty" style="display:none">No tienes tareas abiertas. ¡Añade una! 🎉</div>
+
+  <div class="section-lbl">Archivadas recientes</div>
+  <div id="home-arc-list"></div>
+</div>
+
+<!-- TASKS / DETAIL -->
+<div class="screen" id="s-tasks">
+  <div id="task-list-view">
+    <div class="section-lbl">Tareas abiertas</div>
+    <div id="tasks-list-full"></div>
+    <div class="empty-msg" id="tasks-empty" style="display:none">No hay tareas. Crea una con el botón +</div>
+  </div>
+  <div id="task-detail-view" style="display:none">
+    <button class="back-btn" onclick="showTaskList()">← Volver</button>
+    <div class="card">
+      <div class="detail-header">
+        <div>
+          <div class="detail-title" id="det-title"></div>
+          <div class="detail-course" id="det-course"></div>
+          <div style="margin-top:6px" id="det-badge"></div>
+        </div>
+        <span class="counter-badge" id="det-counter">0/0</span>
+      </div>
+      <div class="pbar-bg"><div class="pbar-fill" id="det-pbar" style="width:0%"></div></div>
+      <div style="font-size:12px;color:#666;margin-top:8px;line-height:1.5" id="det-desc"></div>
+    </div>
+    <div class="card">
+      <div class="section-lbl" style="margin-top:0">Pasos</div>
+      <div id="det-steps"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="go('s-pomo')">⏱ Enfocar</button>
+      <button class="btn btn-danger" onclick="archiveCurrentTask()">Archivar tarea</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW TASK -->
+<div class="screen" id="s-new">
+  <div class="section-lbl" style="margin-top:4px">Nueva Tarea</div>
+  <div id="save-alert" class="alert alert-success" style="display:none">✓ Tarea guardada correctamente</div>
+  <div class="form-group">
+    <label>Título *</label>
+    <input type="text" id="f-title" placeholder="Nombre de la tarea">
+  </div>
+  <div class="form-group">
+    <label>Curso *</label>
+    <input type="text" id="f-course" placeholder="Nombre del curso">
+  </div>
+  <div class="form-group">
+    <label>Descripción</label>
+    <textarea id="f-desc" placeholder="¿En qué consiste esta tarea?"></textarea>
+  </div>
+  <div class="form-group">
+    <label>Prioridad</label>
+    <div class="priority-row">
+      <button class="priority-btn sel-r" onclick="setPriority('r',this)" id="p-r">🔴 Alta</button>
+      <button class="priority-btn" onclick="setPriority('y',this)" id="p-y">🟡 Media</button>
+      <button class="priority-btn" onclick="setPriority('g',this)" id="p-g">🟢 Baja</button>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Fecha de cierre</label>
+    <input type="date" id="f-date">
+  </div>
+  <div class="form-group">
+    <label>Subtareas / Pasos</label>
+    <div id="subtask-rows">
+      <div class="subtask-row"><input type="text" placeholder="Paso 1"><button class="btn-add" onclick="addSubtask()">+</button></div>
+      <div class="subtask-row"><input type="text" placeholder="Paso 2"></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-secondary" onclick="clearForm()">Limpiar</button>
+    <button class="btn btn-primary" onclick="saveTask()">Guardar tarea</button>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="screen" id="s-cal">
+  <div class="cal-nav">
+    <button onclick="chMonth(-1)">‹</button>
+    <strong id="cal-lbl">Mayo 2026</strong>
+    <button onclick="chMonth(1)">›</button>
+  </div>
+  <div class="cal-hdr">
+    <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div><div>Do</div>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+  <div class="cal-sel" id="cal-sel">Toca un día para ver sus tareas</div>
+  <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:#777">
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#4caf74;margin-right:4px"></span>A tiempo</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e8a830;margin-right:4px"></span>Precaución</span>
+    <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#e05050;margin-right:4px"></span>Cerrándose</span>
+  </div>
+</div>
+
+<!-- ARCHIVED -->
+<div class="screen" id="s-arc">
+  <div class="section-lbl" style="margin-top:4px">Tareas archivadas</div>
+  <div id="arc-list"></div>
+  <div class="empty-msg" id="arc-empty">Aún no tienes tareas archivadas</div>
+</div>
+
+<!-- PROGRESS -->
+<div class="screen" id="s-prog">
+  <div class="section-lbl" style="margin-top:4px">Mi Progreso</div>
+  <div class="stats-row">
+    <div class="stat-c"><div class="stat-v" id="st-total">0</div><div class="stat-l">Tareas totales</div></div>
+    <div class="stat-c"><div class="stat-v" style="color:#4caf74" id="st-done">0</div><div class="stat-l">Completadas</div></div>
+    <div class="stat-c"><div class="stat-v" id="st-pomo">0</div><div class="stat-l">Sesiones Pomodoro</div></div>
+  </div>
+  <div class="card">
+    <div class="section-lbl" style="margin-top:0">Tareas completadas por día</div>
+    <div class="barchart" id="barchart"></div>
+    <div style="display:flex;gap:4px" id="bardayrow"></div>
+  </div>
+  <div class="card">
+    <div class="section-lbl" style="margin-top:0">Progreso por curso</div>
+    <div id="course-bars"></div>
+  </div>
+  <div class="card">
+    <div class="section-lbl" style="margin-top:0">Tiempo de enfoque</div>
+    <div style="font-size:24px;font-weight:bold" id="focus-time">0h 0m</div>
+    <div style="font-size:11px;color:#777;margin-top:4px">Basado en sesiones Pomodoro completadas</div>
+  </div>
+</div>
+
+<!-- POMODORO -->
+<div class="screen" id="s-pomo">
+  <div class="pomo-center">
+    <div style="font-size:12px;color:#888;margin-bottom:4px">Tarea activa:</div>
+    <div class="pomo-task-lbl" id="pomo-task-lbl">Ninguna seleccionada</div>
+    <div class="pomo-ring" id="pomo-ring-el">
+      <div>
+        <div class="pomo-time" id="pomo-disp">25:00</div>
+        <div class="pomo-phase" id="pomo-phase">Enfoque</div>
+      </div>
+    </div>
+    <div class="pomo-btns">
+      <button class="pomo-btn" onclick="resetPomo()" title="Reiniciar">↺</button>
+      <button class="pomo-btn main" id="pomo-play" onclick="togglePomo()">▶</button>
+      <button class="pomo-btn" onclick="skipPomo()" title="Saltar">⏭</button>
+    </div>
+    <div class="pips" id="pips">
+      <div class="pip on"></div><div class="pip"></div><div class="pip"></div><div class="pip"></div>
+    </div>
+    <div style="font-size:11px;color:#999;margin-top:8px" id="pomo-sess-lbl">Sesión 1 de 4</div>
+    <div style="margin-top:16px;font-size:12px;color:#777">Selecciona una tarea desde la lista para asociarla</div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="nav">
+  <button onclick="go('s-home')" id="n-home"><span>🏠</span>Inicio</button>
+  <button onclick="go('s-tasks')" id="n-tasks"><span>📋</span>Tareas</button>
+  <button onclick="go('s-new')" id="n-new"><span>➕</span>Nueva</button>
+  <button onclick="go('s-cal')" id="n-cal"><span>📅</span>Calendario</button>
+  <button onclick="go('s-prog')" id="n-prog"><span>📊</span>Progreso</button>
+  <button onclick="go('s-arc')" id="n-arc"><span>📂</span>Archivo</button>
+</div>
+
+<script>
+// ============ STATE ============
+const KEYS = { tasks: 'dye_tasks', archived: 'dye_archived', pomo: 'dye_pomo_sessions', focus: 'dye_focus_mins', daily: 'dye_daily' };
+
+function load(k, def) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
+function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} }
+
+let tasks = load(KEYS.tasks, [
+  { id: 1, title: 'Etapa 4. Prácticas Simuladas', course: 'Proyecto de Ingeniería I', desc: 'La actividad consiste en materializar el diseño de la Etapa 3 en un prototipo de bajo nivel para evaluar su funcionamiento, pertinencia y potencial de escalabilidad.', priority: 'g', date: '2026-05-09', steps: [{t:'Presentación y Evaluación (Colaborativa)',d:true},{t:'Explicación del Funcionamiento (Individual)',d:false},{t:'Construcción y Documentación (Individual)',d:false}], created: Date.now() },
+  { id: 2, title: 'Etapa 4. Componente Práctico', course: 'Redes y Comunicaciones', desc: 'Elaborar el diseño de una red en el simulador utilizando IPv4. Se recomienda usar Packet Tracer versión 8.0.', priority: 'y', date: '2026-05-12', steps: [{t:'Crear o definir una dirección IPv4 Clase C',d:false},{t:'Diseñar una red IPv4 con 4 subredes (1 inalámbrica)',d:false},{t:'Realizar video grupal de sustentación (máx. 5 min)',d:false}], created: Date.now() },
+  { id: 3, title: 'Aplicaciones de la Integral', course: 'Cálculo Integral', desc: 'Revisar los contenidos del Resultado de Aprendizaje 3 en el entorno de aprendizaje, en el Anexo 3.', priority: 'r', date: '2026-05-08', steps: [{t:'Seleccionar serie de ejercicios A, B, C, D, o E y desarrollar ese literal',d:false},{t:'Desarrollar ejercicios en Word/PDF usando editor de ecuaciones',d:false}], created: Date.now() }
+]);
+let archived = load(KEYS.archived, [
+  { id: 101, title: 'Etapa 1. Identificación del problema', course: 'Proyecto de Ingeniería I', archivedAt: '17 feb 2026' },
+  { id: 102, title: 'Etapa 2. Planteamiento de soluciones', course: 'Proyecto de Ingeniería I', archivedAt: '08 mar 2026' },
+  { id: 103, title: 'Etapa 3. Diseño del esquema', course: 'Proyecto de Ingeniería I', archivedAt: '29 mar 2026' },
+]);
+let pomoSessions = load(KEYS.pomo, 0);
+let focusMins = load(KEYS.focus, 0);
+let dailyData = load(KEYS.daily, {});
+
+let currentTask = null;
+let currentPriority = 'r';
+let subtaskCount = 2;
+
+// ============ NAV ============
+const screens = ['s-home','s-tasks','s-new','s-cal','s-prog','s-arc','s-pomo'];
+const navBtns = { 's-home':'n-home','s-tasks':'n-tasks','s-new':'n-new','s-cal':'n-cal','s-prog':'n-prog','s-arc':'n-arc' };
+
+function go(id) {
+  screens.forEach(s => document.getElementById(s).classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+  Object.values(navBtns).forEach(b => document.getElementById(b).classList.remove('act'));
+  if (navBtns[id]) document.getElementById(navBtns[id]).classList.add('act');
+  if (id === 's-home') renderHome();
+  if (id === 's-tasks') renderTaskList();
+  if (id === 's-cal') renderCal();
+  if (id === 's-arc') renderArchived();
+  if (id === 's-prog') renderProgress();
+}
+
+// ============ PRIORITY ============
+function setPriority(p, btn) {
+  currentPriority = p;
+  ['r','y','g'].forEach(x => {
+    const el = document.getElementById('p-'+x);
+    el.className = 'priority-btn' + (x === p ? ' sel-'+x : '');
+  });
+}
+
+// ============ HELPERS ============
+function priorityColor(p) { return p==='g'?'#4caf74':p==='y'?'#e8a830':'#e05050'; }
+function priorityLabel(p) { return p==='g'?'A tiempo':p==='y'?'Precaución':'Cerrándose'; }
+function priorityBgClass(p) { return p==='g'?'bg-g':p==='y'?'bg-y':'bg-r'; }
+function taskProgress(t) {
+  if (!t.steps || !t.steps.length) return { done: 0, total: 0, pct: 0 };
+  const done = t.steps.filter(s=>s.d).length;
+  return { done, total: t.steps.length, pct: Math.round(done/t.steps.length*100) };
+}
+
+// ============ HOME ============
+function renderHome() {
+  const open = tasks;
+  const el = document.getElementById('home-tasks-list');
+  el.innerHTML = '';
+  document.getElementById('home-empty').style.display = open.length ? 'none' : 'block';
+  open.forEach(t => {
+    const prog = taskProgress(t);
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.innerHTML = `<div class="dot" style="background:${priorityColor(t.priority)}"></div><div class="info"><div class="name">${t.title}</div><div class="course">${t.course}</div></div><span class="badge ${priorityBgClass(t.priority)}">${priorityLabel(t.priority)}</span>`;
+    div.onclick = () => { go('s-tasks'); openTaskDetail(t.id); };
+    el.appendChild(div);
+  });
+
+  // archived recent
+  const arcEl = document.getElementById('home-arc-list');
+  arcEl.innerHTML = '';
+  archived.slice(-2).reverse().forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.style.opacity = '0.5';
+    div.innerHTML = `<div style="font-size:14px">✓</div><div class="info"><div class="name" style="text-decoration:line-through">${a.title}</div><div class="course">${a.course}</div></div><span style="font-size:11px;color:#aaa">${a.archivedAt||''}</span>`;
+    arcEl.appendChild(div);
+  });
+
+  // progress
+  const allSteps = tasks.reduce((acc,t)=>acc+(t.steps?t.steps.length:0),0);
+  const doneSteps = tasks.reduce((acc,t)=>acc+(t.steps?t.steps.filter(s=>s.d).length:0),0);
+  const arcCount = archived.length;
+  const total = tasks.length + arcCount;
+  const pct = total > 0 ? Math.round(arcCount/total*100) : 0;
+  document.getElementById('home-pct').textContent = pct + '%';
+  document.getElementById('home-pbar').style.width = pct + '%';
+  document.getElementById('home-count').textContent = arcCount + ' / ' + total + ' tareas completadas';
+
+  // time
+  const now = new Date();
+  document.getElementById('home-time').textContent = now.toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ============ TASK LIST ============
+function renderTaskList() {
+  const el = document.getElementById('tasks-list-full');
+  el.innerHTML = '';
+  document.getElementById('tasks-empty').style.display = tasks.length ? 'none' : 'block';
+  tasks.forEach(t => {
+    const prog = taskProgress(t);
+    const div = document.createElement('div');
+    div.className = 'task-item';
+    div.innerHTML = `<div class="dot" style="background:${priorityColor(t.priority)}"></div><div class="info"><div class="name">${t.title}</div><div class="course">${t.course}</div><div class="pbar-bg" style="margin-top:5px"><div class="pbar-fill" style="width:${prog.pct}%"></div></div><div style="font-size:10px;color:#999;margin-top:2px">${prog.done}/${prog.total} pasos</div></div><span class="badge ${priorityBgClass(t.priority)}">${priorityLabel(t.priority)}</span>`;
+    div.onclick = () => openTaskDetail(t.id);
+    el.appendChild(div);
+  });
+  showTaskList();
+}
+
+function showTaskList() {
+  document.getElementById('task-list-view').style.display = 'block';
+  document.getElementById('task-detail-view').style.display = 'none';
+  currentTask = null;
+}
+
+function openTaskDetail(id) {
+  const t = tasks.find(x=>x.id===id);
+  if (!t) return;
+  currentTask = t;
+  document.getElementById('task-list-view').style.display = 'none';
+  document.getElementById('task-detail-view').style.display = 'block';
+  document.getElementById('det-title').textContent = t.title;
+  document.getElementById('det-course').textContent = t.course;
+  document.getElementById('det-badge').innerHTML = `<span class="badge ${priorityBgClass(t.priority)}">${priorityLabel(t.priority)}</span>${t.date?' · Cierre: '+t.date:''}`;
+  document.getElementById('det-desc').textContent = t.desc || '';
+  document.getElementById('pomo-task-lbl').textContent = t.title + ' · ' + t.course;
+  renderSteps(t);
+}
+
+function renderSteps(t) {
+  const prog = taskProgress(t);
+  document.getElementById('det-counter').textContent = prog.done + '/' + prog.total;
+  document.getElementById('det-pbar').style.width = prog.pct + '%';
+  const el = document.getElementById('det-steps');
+  el.innerHTML = '';
+  (t.steps||[]).forEach((s,i) => {
+    const div = document.createElement('div');
+    div.className = 'step-item';
+    div.innerHTML = `<div class="step-check ${s.d?'done':''}" onclick="toggleStep(${t.id},${i})">${s.d?'✓':''}</div><div class="step-text ${s.d?'done':''}">${s.t}</div>`;
+    el.appendChild(div);
+  });
+}
+
+function toggleStep(taskId, stepIdx) {
+  const t = tasks.find(x=>x.id===taskId);
+  if (!t) return;
+  t.steps[stepIdx].d = !t.steps[stepIdx].d;
+  // record daily
+  const today = new Date().toISOString().slice(0,10);
+  if (!dailyData[today]) dailyData[today] = 0;
+  if (t.steps[stepIdx].d) dailyData[today]++;
+  else dailyData[today] = Math.max(0, dailyData[today]-1);
+  save(KEYS.tasks, tasks);
+  save(KEYS.daily, dailyData);
+  renderSteps(t);
+}
+
+function archiveCurrentTask() {
+  if (!currentTask) return;
+  const t = currentTask;
+  const now = new Date();
+  archived.push({ id: t.id, title: t.title, course: t.course, archivedAt: now.toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'}) });
+  tasks = tasks.filter(x=>x.id!==t.id);
+  save(KEYS.tasks, tasks);
+  save(KEYS.archived, archived);
+  showTaskList();
+  renderTaskList();
+}
+
+// ============ NEW TASK FORM ============
+function addSubtask() {
+  subtaskCount++;
+  const row = document.createElement('div');
+  row.className = 'subtask-row';
+  row.innerHTML = `<input type="text" placeholder="Paso ${subtaskCount}">`;
+  document.getElementById('subtask-rows').appendChild(row);
+}
+
+function saveTask() {
+  const title = document.getElementById('f-title').value.trim();
+  const course = document.getElementById('f-course').value.trim();
+  if (!title || !course) { alert('El título y el curso son obligatorios'); return; }
+  const desc = document.getElementById('f-desc').value.trim();
+  const date = document.getElementById('f-date').value;
+  const steps = Array.from(document.querySelectorAll('#subtask-rows input')).map(i=>i.value.trim()).filter(Boolean).map(t=>({t,d:false}));
+  const newTask = { id: Date.now(), title, course, desc, priority: currentPriority, date, steps, created: Date.now() };
+  tasks.push(newTask);
+  save(KEYS.tasks, tasks);
+  const alert = document.getElementById('save-alert');
+  alert.style.display = 'block';
+  setTimeout(() => alert.style.display='none', 3000);
+  clearForm();
+}
+
+function clearForm() {
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-course').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('f-date').value = '';
+  document.querySelectorAll('#subtask-rows input').forEach(i=>i.value='');
+  currentPriority = 'r';
+  setPriority('r', document.getElementById('p-r'));
+}
+
+// ============ CALENDAR ============
+const MNS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+let cy=2026, cm=4;
+
+function renderCal() {
+  document.getElementById('cal-lbl').textContent = MNS[cm]+' '+cy;
+  const g = document.getElementById('cal-grid');
+  g.innerHTML = '';
+  const fd = new Date(cy,cm,1).getDay();
+  const off = fd===0?6:fd-1;
+  const dim = new Date(cy,cm+1,0).getDate();
+  const dip = new Date(cy,cm,0).getDate();
+  const td = new Date();
+  const itm = td.getFullYear()===cy && td.getMonth()===cm;
+
+  // task dates map
+  const tmap = {};
+  tasks.forEach(t => {
+    if (t.date) {
+      const d = new Date(t.date);
+      if (d.getFullYear()===cy && d.getMonth()===cm) {
+        const day = d.getDate();
+        if (!tmap[day]) tmap[day] = [];
+        tmap[day].push(t.priority);
+      }
+    }
+  });
+
+  for (let i=0;i<off;i++) {
+    const d=document.createElement('div'); d.className='cal-day other';
+    d.innerHTML=`<div class="day-n">${dip-off+i+1}</div>`; g.appendChild(d);
+  }
+  for (let d=1;d<=dim;d++) {
+    const el=document.createElement('div');
+    el.className='cal-day'+(itm&&d===td.getDate()?' today':'');
+    const dots=(tmap[d]||[]).map(p=>`<div class="ddot" style="background:${priorityColor(p)}"></div>`).join('');
+    el.innerHTML=`<div class="day-n">${d}</div><div class="day-dots">${dots}</div>`;
+    const dayTasks=tmap[d]||[];
+    el.onclick=()=>showCalDay(d,dayTasks);
+    g.appendChild(el);
+  }
+  const rem=(off+dim)%7===0?0:7-(off+dim)%7;
+  for (let i=1;i<=rem;i++) {
+    const d=document.createElement('div'); d.className='cal-day other';
+    d.innerHTML=`<div class="day-n">${i}</div>`; g.appendChild(d);
+  }
+}
+
+function showCalDay(day, dayTasks) {
+  const info = document.getElementById('cal-sel');
+  if (!dayTasks.length) {
+    const tasksOnDay = tasks.filter(t => { if (!t.date) return false; const d=new Date(t.date); return d.getFullYear()===cy&&d.getMonth()===cm&&d.getDate()===day; });
+    info.innerHTML = tasksOnDay.length ? '' : `<span style="color:#bbb">${day} de ${MNS[cm]} — sin tareas</span>`;
+    return;
+  }
+  const tasksOnDay = tasks.filter(t => { if (!t.date) return false; const d=new Date(t.date); return d.getFullYear()===cy&&d.getMonth()===cm&&d.getDate()===day; });
+  info.innerHTML = `<strong style="font-size:11px;color:#555">${day} de ${MNS[cm]}</strong><br>` + tasksOnDay.map(t=>`<div style="display:flex;align-items:center;gap:6px;margin-top:5px"><div class="ddot" style="background:${priorityColor(t.priority)};width:8px;height:8px;border-radius:50%"></div><span>${t.title}</span><span style="font-size:10px;color:#999;margin-left:4px">${t.course}</span></div>`).join('');
+}
+
+function chMonth(d) {
+  cm+=d;
+  if(cm>11){cm=0;cy++;}
+  if(cm<0){cm=11;cy--;}
+  renderCal();
+  document.getElementById('cal-sel').textContent='Toca un día para ver sus tareas';
+}
+
+// ============ ARCHIVED ============
+function renderArchived() {
+  const el = document.getElementById('arc-list');
+  el.innerHTML = '';
+  document.getElementById('arc-empty').style.display = archived.length ? 'none' : 'block';
+  [...archived].reverse().forEach(a => {
+    const div = document.createElement('div');
+    div.className = 'arc-item';
+    div.innerHTML = `<div class="arc-chk">✓</div><div><div class="arc-name">${a.title}</div><div class="arc-course">${a.course}</div></div><div class="arc-date">${a.archivedAt||''}</div>`;
+    el.appendChild(div);
+  });
+}
+
+// ============ PROGRESS ============
+function renderProgress() {
+  document.getElementById('st-total').textContent = tasks.length + archived.length;
+  document.getElementById('st-done').textContent = archived.length;
+  document.getElementById('st-pomo').textContent = pomoSessions;
+
+  // bar chart last 7 days
+  const bc = document.getElementById('barchart');
+  const bdr = document.getElementById('bardayrow');
+  bc.innerHTML = ''; bdr.innerHTML = '';
+  const days = [];
+  for (let i=6;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    days.push(d);
+  }
+  const maxVal = Math.max(1, ...days.map(d=>dailyData[d.toISOString().slice(0,10)]||0));
+  days.forEach(d => {
+    const key = d.toISOString().slice(0,10);
+    const val = dailyData[key]||0;
+    const h = Math.max(3, Math.round(val/maxVal*60));
+    const col = document.createElement('div'); col.className='bc';
+    col.innerHTML=`<div class="bv">${val}</div><div class="bf ${val===0?'lt':''}" style="height:${h}px"></div>`;
+    bc.appendChild(col);
+    const dayEl = document.createElement('div'); dayEl.className='bc';
+    dayEl.innerHTML=`<div class="bd">${['Do','Lu','Ma','Mi','Ju','Vi','Sá'][d.getDay()]}</div>`;
+    bdr.appendChild(dayEl);
+  });
+
+  // course progress
+  const courseBars = document.getElementById('course-bars');
+  courseBars.innerHTML = '';
+  const courseMap = {};
+  [...tasks, ...archived.map(a=>({...a,_arc:true}))].forEach(t => {
+    const c = t.course||'Sin curso';
+    if (!courseMap[c]) courseMap[c] = { total:0, done:0 };
+    courseMap[c].total++;
+    if (t._arc) courseMap[c].done++;
+  });
+  Object.entries(courseMap).forEach(([course, data]) => {
+    const pct = data.total > 0 ? Math.round(data.done/data.total*100) : 0;
+    const colors = ['#4caf74','#e8a830','#e05050','#5b8dee','#9b59b6'];
+    const color = colors[Object.keys(courseMap).indexOf(course) % colors.length];
+    const div = document.createElement('div'); div.className='course-row';
+    div.innerHTML=`<div class="cr-top"><span>${course}</span><span>${pct}%</span></div><div class="pbar-bg"><div class="pbar-fill" style="width:${pct}%;background:${color}"></div></div>`;
+    courseBars.appendChild(div);
+  });
+
+  // focus time
+  const h = Math.floor(focusMins/60), m = focusMins%60;
+  document.getElementById('focus-time').textContent = `${h}h ${m}m`;
+}
+
+// ============ POMODORO ============
+let pLeft = 25*60, pTotal = 25*60, pRun = false, pInt = null, pSess = 1, pBreak = false;
+
+function updPomo() {
+  const m=Math.floor(pLeft/60), s=pLeft%60;
+  const t=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  document.getElementById('pomo-disp').textContent=t;
+  document.getElementById('home-pomo-disp').textContent=t;
+  // ring color
+  const pct = pLeft/pTotal;
+  const hue = pBreak ? '120' : '0';
+  document.getElementById('pomo-ring-el').style.borderColor = pct > 0.5 ? '#1a1a1a' : pBreak ? '#4caf74' : '#e05050';
+}
+
+function togglePomo() {
+  pRun = !pRun;
+  document.getElementById('pomo-play').textContent = pRun ? '⏸' : '▶';
+  if (pRun) {
+    pInt = setInterval(() => {
+      if (pLeft > 0) { pLeft--; updPomo(); }
+      else {
+        clearInterval(pInt); pRun = false;
+        document.getElementById('pomo-play').textContent = '▶';
+        if (!pBreak) {
+          // completed focus session
+          pomoSessions++; save(KEYS.pomo, pomoSessions);
+          focusMins += 25; save(KEYS.focus, focusMins);
+          const today = new Date().toISOString().slice(0,10);
+          if (!dailyData[today]) dailyData[today] = 0;
+          save(KEYS.daily, dailyData);
+          if (pSess < 4) { pSess++; updatePips(); }
+          pBreak = true; pTotal = 5*60; pLeft = 5*60;
+          document.getElementById('pomo-phase').textContent = '¡Descanso!';
+        } else {
+          pBreak = false; pTotal = 25*60; pLeft = 25*60;
+          document.getElementById('pomo-phase').textContent = 'Enfoque';
+        }
+        document.getElementById('pomo-sess-lbl').textContent = 'Sesión '+pSess+' de 4';
+        updPomo();
+      }
+    }, 1000);
+  } else { clearInterval(pInt); }
+}
+
+function resetPomo() {
+  clearInterval(pInt); pRun=false; pBreak=false;
+  pLeft=25*60; pTotal=25*60;
+  document.getElementById('pomo-play').textContent='▶';
+  document.getElementById('pomo-phase').textContent='Enfoque';
+  updPomo();
+}
+
+function skipPomo() {
+  clearInterval(pInt); pRun=false;
+  document.getElementById('pomo-play').textContent='▶';
+  pBreak=!pBreak;
+  if(pBreak){pTotal=5*60;pLeft=5*60;document.getElementById('pomo-phase').textContent='Descanso';}
+  else{pTotal=25*60;pLeft=25*60;document.getElementById('pomo-phase').textContent='Enfoque';}
+  updPomo();
+}
+
+function updatePips() {
+  const pips = document.querySelectorAll('#pips .pip');
+  pips.forEach((p,i) => { p.className = 'pip' + (i<pSess?' on':''); });
+}
+
+// ============ CONNECTIVITY ============
+function updateConn() {
+  const b = document.getElementById('conn-badge');
+  if (navigator.onLine) { b.textContent='● En línea'; b.className='offline-badge'; }
+  else { b.textContent='● Sin conexión'; b.className='offline-badge off'; }
+}
+window.addEventListener('online', updateConn);
+window.addEventListener('offline', updateConn);
+updateConn();
+
+// ============ INIT ============
+function init() {
+  renderHome();
+  go('s-home');
+  setInterval(() => {
+    if (document.getElementById('s-home').classList.contains('show')) {
+      document.getElementById('home-time').textContent = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    }
+  }, 10000);
+}
+
+init();
+</script>
+</body>
+</html>
