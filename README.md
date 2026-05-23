@@ -22,7 +22,7 @@ FocusU ofrece una solución **simple, gratuita y funcional sin internet** para a
 
 ---
 
-## <img src="" align="right" width="68px"> Conoce a Ada
+## <img src="assets/images/ada-la-ardilla.jpg" align="right" width="72px" /> Conoce a Ada
 
 **Ada** es la mascota de FocusU. Su nombre rinde homenaje a:
 
